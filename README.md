@@ -51,7 +51,7 @@ ports — export terminals
 freight_matrix — distance-based transport costs
 Getting Started
 1. Clone the repository
-git clone https://github.com/AnorienI/exw-fca-pipeline.git
+git clone https://github.com/Anorien/exw-fca-pipeline.git
 cd exw-fca-pipeline
 2. Set up the database
 mysql -u your_user -p < sql/schema.sql
