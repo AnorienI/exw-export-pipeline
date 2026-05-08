@@ -84,7 +84,7 @@ Improve cost modeling granularity
 
 License
 
- (e.g., MIT).
+ 
 
  Author 
 
