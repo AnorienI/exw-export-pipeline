@@ -1,0 +1,17 @@
+# Ignorar a pasta de ambiente virtual
+venv/
+env/
+
+# Ignorar arquivos temporários do Python
+__pycache__/
+*.pyc
+
+# Ignorar arquivos de configuração sensíveis (senhas do MariaDB)
+.env
+
+# Ignorar pastas de IDEs
+.vscode/
+.idea
+
+# Ignorar arquivos de segredos
+.env/
