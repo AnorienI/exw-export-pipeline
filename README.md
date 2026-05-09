@@ -1,118 +1,124 @@
-EXW to FCA (and FAS) Pipeline
-A data-driven pipeline for modeling the cost and compliance shift from EXW to FCA/FAS for Brazilian exporters.
+# EXW to FCA (and FAS) Pipeline
 
-Overview
-Selling under EXW (Ex Works) in Brazil can expose small producers to tax liability if the export is not properly registered in Siscomex (DU-E).
+A data-driven pipeline for modeling the cost and compliance shift from EXW to FCA/FAS for 
+Brazilian exporters.
+
+## Overview
+
+Selling under EXW (Ex Works) in Brazil can expose small producers to tax liability if the export 
+is not properly registered in Siscomex (DU-E).
 
 This project combines:
 
-A legal-operational model for export intermediation.
-
-A data pipeline that quantifies the cost difference between EXW and FCA/FAS.
+- A legal-operational model for export intermediation.
+- A data pipeline that quantifies the cost difference between EXW and FCA/FAS.
 
 The goal is to provide a reproducible and transparent framework for export decision-making.
 
-Key Features
-Deterministic cost modeling (EXW → FCA/FAS).
+## Key Features
 
-Structured data ingestion (freight tables, distance matrices).
+1. **Deterministic Cost Modeling (EXW → FCA/FAS)**: Computes price delta and encodes 
+logistics/compliance assumptions.
+2. **Structured Data Ingestion**: Freight tables, distance matrices.
+3. **MariaDB-Backed Relational Schema**:
+4. **Modular Pipeline Design**: Ingestion → Normalization → Computation → Output.
+5. **Designed for Reproducibility and Extension**.
 
-MariaDB-backed relational schema.
+## Project Structure
 
-Modular pipeline design (ingestion → normalization → computation → output).
-
-Designed for reproducibility and extension.
-
-Project Structure
-Plaintext
+```
 exw-fca-pipeline/
 ├── data/           # Raw and processed datasets
 ├── scripts/        # Python scripts (ETL, calculations)
 ├── sql/            # Schema and queries (schema.sql)
 ├── output/         # Generated reports / comparisons
 ├── .env.example    # Template for environment variables
-├── README.md
-└── requirements.txt
-Technical Architecture
-Pipeline Stages
-Ingestion: Freight tables and IBGE distance data.
+└── README.md
+```
 
-Normalization: Unit standardization (kg, ton) and Incoterm scope alignment.
+## Technical Architecture
 
-Cost and Risk Engine: Computes price delta and encodes logistics/compliance assumptions.
+### Pipeline Stages
 
-Output Layer: Comparative cost tables and decision-support outputs.
+1. **Ingestion**: Freight tables and IBGE distance data.
+2. **Normalization**: Unit standardization (kg, ton) and Incoterm scope alignment.
+3. **Cost and Risk Engine**: Computes price delta and encodes logistics/compliance assumptions.
+4. **Output Layer**: Comparative cost tables and decision-support outputs.
 
-Database Schema
+## Database Schema
+
 The project uses MariaDB with the following core tables:
 
-products: NCM codes and physical attributes.
+- `products`: NCM codes and physical attributes.
+- `origins`: Production locations.
+- `ports`: Export terminals.
+- `freight_matrix`: Distance-based transport costs.
 
-origins: Production locations.
+## Getting Started
 
-ports: Export terminals.
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/AnorienI/exw-fca-pipeline.git
+   cd exw-fca-pipeline
+   ```
 
-freight_matrix: Distance-based transport costs.
+2. **Configure Environment Variables**
+   The project uses a `.env` file to manage database credentials safely.
 
-Getting Started
-1. Clone the repository
-Bash
-git clone https://github.com/AnorienI/exw-fca-pipeline.git
-cd exw-fca-pipeline
-2. Configure Environment Variables
-The project uses a .env file to manage database credentials safely.
+   - Copy the example file: `cp .env.example .env`
+   - Open `.env` and fill in your local MariaDB credentials:
+     ```
+     DB_HOST=localhost
+     DB_PORT=3306
+     DB_USER=your_user
+     DB_PASSWORD=your_password
+     DB_NAME=exw_fca
+     ```
 
-Copy the example file: cp .env.example .env
+3. **Set up the Database**
+   ```bash
+   mysql -u your_user -p < sql/schema.sql
+   ```
 
-Open .env and fill in your local MariaDB credentials:
+4. **Install Dependencies**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Linux/Mint
+   pip install -r requirements.txt
+   ```
 
-Plaintext
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_NAME=exw_fca
-3. Set up the Database
-Bash
-mysql -u your_user -p < sql/schema.sql
-4. Install Dependencies
-Bash
-python3 -m venv venv
-source venv/bin/activate  # On Linux/Mint
-pip install -r requirements.txt
-5. Run the Pipeline
-Bash
-python3 scripts/main.py
-Example Output
+5. **Run the Pipeline**
+   ```bash
+   python3 scripts/main.py
+   ```
+
+## Example Output
+
 The pipeline produces structured comparisons, including:
 
-Transport cost adjustments.
+- Transport cost adjustments.
+- Export handling costs.
+- Final adjusted price estimates.
 
-Export handling costs.
+## Use Case
 
-Final adjusted price estimates.
-
-(Add a sample CSV or screenshot here later — this is very valuable for recruiters.)
-
-Use Case
 Designed for:
 
-Small and medium Brazilian producers.
+- Small and medium Brazilian producers.
+- Export consultants and trade intermediaries.
+- Data-driven logistics analysis.
 
-Export consultants and trade intermediaries.
+## Roadmap
 
-Data-driven logistics analysis.
+1. **Add Visualization Layer (Charts / Dashboards)**.
+2. **Integrate Real-time Freight APIs**.
+3. **Expand Incoterms Coverage**.
+4. **Improve Cost Modeling Granularity**.
 
-Roadmap
-Add visualization layer (charts / dashboards).
+## License
 
-Integrate real-time freight APIs.
-
-Expand Incoterms coverage.
-
-Improve cost modeling granularity.
-
-License
 [Insert License Type]
 
-Author: Anestis Mystakidis
+## Author
+
+Anestis Mystakidis
