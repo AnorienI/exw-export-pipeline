@@ -1,53 +1,42 @@
 import requests
-import pandas as pd
+import time
 
-# 1. Definição das cidades para o estudo de caso
 cidades_estudo = {
     "Raio Curto": ["Campinas", "Jundiaí", "Sorocaba"],
     "Raio Médio": ["Ribeirão Preto", "Bauru", "Piracicaba"],
     "Raio Longo": ["São José do Rio Preto", "Araçatuba", "Presidente Prudente"]
 }
 
-def get_city_data(city_name):
-    # Consulta a API de Localidades do IBGE para o estado de SP (ID 35)
-    url = f"https://servicodados.ibge.gov.br/api/v1/localidades/estados/35/municipios"
-    response = requests.get(url)
+# Coordenadas do Porto de Santos (Cais)
+SANTOS_LAT, SANTOS_LON = -23.96, -46.33
+
+def get_coords_and_dist(city_name):
+    # 1. Busca coordenadas via API de Localidades (IBGE)
+    # Nota: A API de localidades não dá lat/lon direto, 
+    # usamos o buscador do OpenStreetMap (Nominatim) que é gratuito
+    geo_url = f"https://nominatim.openstreetmap.org/search?city={city_name}&state=Sao+Paulo&format=json"
+    headers = {'User-Agent': 'exw-fca-pipeline-study'}
     
-    if response.status_code == 200:
-        municipios = response.json()
-        for m in municipios:
-            # Busca exata pelo nome (ignorando maiúsculas/minúsculas)
-            if m['nome'].lower() == city_name.lower():
-                return {
-                    "id_ibge": m['id'],
-                    "nome": m['nome'],
-                    "microrregiao": m['microrregiao']['nome']
-                }
-    return None
+    try:
+        geo_res = requests.get(geo_url, headers=headers).json()
+        if not geo_res: return None
+        
+        lat, lon = geo_res[0]['lat'], geo_res[0]['lon']
+        
+        # 2. Busca distância rodoviária via OSRM
+        osrm_url = f"http://router.project-osrm.org/route/v1/driving/{lon},{lat};{SANTOS_LON},{SANTOS_LAT}?overview=false"
+        route_res = requests.get(osrm_url).json()
+        
+        dist_km = round(route_res['routes'][0]['distance'] / 1000, 2)
+        return dist_km
+    except Exception as e:
+        return f"Erro: {e}"
 
-def get_road_distance(lat1, lon1, lat2, lon2):
-    # Coordenadas aproximadas do Porto de Santos (Cais)
-    # Usando OSRM para distância rodoviária real em vez de linha reta
-    url = f"http://router.project-osrm.org/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false"
-    res = requests.get(url)
-    if res.status_code == 200:
-        data = res.json()
-        # Distância vem em metros, convertendo para km
-        return round(data['routes'][0]['distance'] / 1000, 2)
-    return None
-
-# Coordenadas do Porto de Santos para o cálculo
-SANTOS_COORDS = (-23.96, -46.33) 
-
-print(f"{'Categoria':<15} | {'Cidade':<25} | {'ID IBGE':<10} | {'Dist. Santos (km)'}")
-print("-" * 75)
+print(f"{'Categoria':<15} | {'Cidade':<25} | {'Dist. Santos (km)'}")
+print("-" * 65)
 
 for categoria, lista in cidades_estudo.items():
     for cidade in lista:
-        info = get_city_data(cidade)
-        if info:
-            # Nota: Para coordenadas exatas via IBGE, usaríamos a API de Malhas
-            # Aqui simularemos a lógica que você vai automatizar
-            # (Valores de distância para validação manual)
-            distancia = get_road_distance(-23.96, -46.33, -22.90, -47.06) # Exemplo Campinas
-            print(f"{categoria:<15} | {info['nome']:<25} | {info['id_ibge']:<10} | Pendente consulta OSRM")
+        distancia = get_coords_and_dist(cidade)
+        print(f"{categoria:<15} | {cidade:<25} | {distancia} km")
+        time.sleep(1) # Pausa amigável para as APIs gratuitas
