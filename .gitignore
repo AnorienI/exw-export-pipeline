@@ -1,6 +1,7 @@
 # Ignorar a pasta de ambiente virtual
 venv/
 env/
+exwenv/
 
 # Ignorar arquivos temporários do Python
 __pycache__/
