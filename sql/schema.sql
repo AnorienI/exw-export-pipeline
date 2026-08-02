@@ -123,7 +123,7 @@ CREATE TABLE `view_export_prices` (
 --
 DROP TABLE IF EXISTS `view_export_prices`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_export_prices`  AS SELECT `p`.`name` AS `product`, `p`.`price_exw_brl` AS `price_brl`, round(`p`.`price_exw_brl` / (select `exchange_rates`.`rate_to_brl` from `exchange_rates` where `exchange_rates`.`currency_code` = 'USD' order by `exchange_rates`.`effective_date` desc limit 1),2) AS `price_usd`, round(`p`.`price_exw_brl` / (select `exchange_rates`.`rate_to_brl` from `exchange_rates` where `exchange_rates`.`currency_code` = 'EUR' order by `exchange_rates`.`effective_date` desc limit 1),2) AS `price_eur`, round(`p`.`price_exw_brl` / (select `exchange_rates`.`rate_to_brl` from `exchange_rates` where `exchange_rates`.`currency_code` = 'CNY' order by `exchange_rates`.`effective_date` desc limit 1),2) AS `price_cny` FROM `products` AS `p` ;
+CREATE ALGORITHM=UNDEFINED  SQL SECURITY DEFINER VIEW `view_export_prices`  AS SELECT `p`.`name` AS `product`, `p`.`price_exw_brl` AS `price_brl`, round(`p`.`price_exw_brl` / (select `exchange_rates`.`rate_to_brl` from `exchange_rates` where `exchange_rates`.`currency_code` = 'USD' order by `exchange_rates`.`effective_date` desc limit 1),2) AS `price_usd`, round(`p`.`price_exw_brl` / (select `exchange_rates`.`rate_to_brl` from `exchange_rates` where `exchange_rates`.`currency_code` = 'EUR' order by `exchange_rates`.`effective_date` desc limit 1),2) AS `price_eur`, round(`p`.`price_exw_brl` / (select `exchange_rates`.`rate_to_brl` from `exchange_rates` where `exchange_rates`.`currency_code` = 'CNY' order by `exchange_rates`.`effective_date` desc limit 1),2) AS `price_cny` FROM `products` AS `p` ;
 
 --
 -- Indexes for dumped tables
@@ -204,3 +204,24 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+-- Insere Origem: São José do Rio Preto
+INSERT INTO `origins` (`origin_id`, `name`, `city`, `state`, `country`) 
+VALUES (1, 'Origem SJRP', 'São José do Rio Preto', 'SP', 'BR');
+
+-- Insere Produto: Açúcar
+INSERT INTO `products` (`product_id`, `name`, `hs_code`, `unit_weight_kg`, `price_exw_brl`) 
+VALUES (1, 'Açúcar VHP', '1701.14.00', 1000.00, 2500.00);
+
+-- Insere Frete e Distância: SJRP (origin_id 1) -> Santos (port_id 1)
+-- Distância aproximada: 498 km | Custo hipotético por tonelada: R$ 130.00
+INSERT INTO `freight_matrix` (`origin_id`, `port_id`, `cost_per_ton`, `distance_km`) 
+VALUES (1, 1, 130.00, 498);
+
+-- Taxa de Câmbio de Teste para a view_export_prices funcionar
+INSERT INTO `exchange_rates` (`currency_code`, `rate_to_brl`, `source`, `effective_date`)
+VALUES 
+('USD', 5.2000, 'BCB_PTAX', CURRENT_DATE()),
+('EUR', 5.6000, 'BCB_PTAX', CURRENT_DATE()),
+('CNY', 0.7200, 'BCB_PTAX', CURRENT_DATE());
